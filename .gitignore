@@ -1,0 +1,12 @@
+node_modules
+dist
+
+# Local credentials (KEY=VALUE) — Trello key/token live here.
+.env
+.env.development
+.env.local
+
+# npm pack output
+*.tgz
+
+.DS_Store

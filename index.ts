@@ -1,7 +1,7 @@
 /**
  * Public surface of the Trello wrapper.
  *
- *   import { createTrelloClient } from "./trello/index.ts";
+ *   import { createTrelloClient } from "@huksley/trello-cli";
  *
  *   const trello = createTrelloClient();              // reads TRELLO_API_KEY + TRELLO_TOKEN
  *   const issues = await trello.listCardsInList(listId);

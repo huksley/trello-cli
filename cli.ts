@@ -1,33 +1,34 @@
 #!/usr/bin/env node
 /**
- * Thin CLI around TrelloClient — handy for trying the wrapper or scripting from
- * the shell. Reads TRELLO_API_KEY + TRELLO_TOKEN from the environment.
+ * `trello-cli` — a thin CLI around TrelloClient for managing Trello cards
+ * ("issues") and their comments from the shell. Reads TRELLO_API_KEY +
+ * TRELLO_TOKEN from the environment.
  *
- *   node --env-file-if-exists=.env.development trello/cli.ts <command> [args]
- *   # or, via package.json:
- *   npm run trello -- <command> [args]
+ *   trello-cli <command> [args]                                       # installed (npm i -g) or via npx
+ *   node --env-file-if-exists=.env.development cli.ts <command> [args] # from source
+ *   npm run dev -- <command> [args]                                   # via package.json
  */
 
 import { TrelloClient } from "./client.ts";
 import type { TrelloCard } from "./types.ts";
 
-const USAGE = `trello — manage Trello cards ("issues") + comments
+const USAGE = `trello-cli — manage Trello cards ("issues") + comments
 
 Usage:
-  trello boards                          List boards you can access
-  trello lists <boardId>                 List a board's lists (status columns)
-  trello cards <boardId>                 List a board's cards (issues)
-  trello list-cards <listId>             List cards in one list
-  trello card <cardId>                   Show one card
-  trello create --list <id> --name <t> [--desc <d>] [--label <id>...] [--member <id>...]
-                                         Create a card (--label/--member repeatable)
-  trello move <cardId> <listId>          Move a card to another list
-  trello archive <cardId>                Archive (close) a card
-  trello delete <cardId>                 Permanently delete a card
-  trello comment <cardId> <text...>      Add a comment
-  trello comments <cardId>               Read comments (oldest first)
+  trello-cli boards                          List boards you can access
+  trello-cli lists <boardId>                 List a board's lists (status columns)
+  trello-cli cards <boardId>                 List a board's cards (issues)
+  trello-cli list-cards <listId>             List cards in one list
+  trello-cli card <cardId>                   Show one card
+  trello-cli create --list <id> --name <t> [--desc <d>] [--label <id>...] [--member <id>...]
+                                             Create a card (--label/--member repeatable)
+  trello-cli move <cardId> <listId>          Move a card to another list
+  trello-cli archive <cardId>                Archive (close) a card
+  trello-cli delete <cardId>                 Permanently delete a card
+  trello-cli comment <cardId> <text...>      Add a comment
+  trello-cli comments <cardId>               Read comments (oldest first)
 
-Auth: set TRELLO_API_KEY and TRELLO_TOKEN (see trello/README.md).`;
+Auth: set TRELLO_API_KEY and TRELLO_TOKEN (see the README).`;
 
 /**
  * Minimal parser: pulls `--flag value` pairs out, leaves the rest as positionals.
@@ -82,7 +83,7 @@ const main = async (): Promise<void> => {
     case "lists": {
       const boardId = rest[0];
       if (!boardId) {
-        throw new Error("usage: trello lists <boardId>");
+        throw new Error("usage: trello-cli lists <boardId>");
       }
       for (const l of await client.listLists(boardId)) {
         console.log(`${l.id}  ${l.name}`);
@@ -92,7 +93,7 @@ const main = async (): Promise<void> => {
     case "cards": {
       const boardId = rest[0];
       if (!boardId) {
-        throw new Error("usage: trello cards <boardId>");
+        throw new Error("usage: trello-cli cards <boardId>");
       }
       for (const c of await client.listCardsOnBoard(boardId)) {
         console.log(`${c.id}  ${c.name}`);
@@ -102,7 +103,7 @@ const main = async (): Promise<void> => {
     case "list-cards": {
       const listId = rest[0];
       if (!listId) {
-        throw new Error("usage: trello list-cards <listId>");
+        throw new Error("usage: trello-cli list-cards <listId>");
       }
       for (const c of await client.listCardsInList(listId)) {
         console.log(`${c.id}  ${c.name}`);
@@ -112,7 +113,7 @@ const main = async (): Promise<void> => {
     case "card": {
       const cardId = rest[0];
       if (!cardId) {
-        throw new Error("usage: trello card <cardId>");
+        throw new Error("usage: trello-cli card <cardId>");
       }
       const c = await client.getCard(cardId);
       printCard(c);
@@ -126,7 +127,7 @@ const main = async (): Promise<void> => {
       const name = flags.name;
       if (!idList || !name) {
         throw new Error(
-          "usage: trello create --list <id> --name <title> [--desc <text>] [--label <id>...] [--member <id>...]"
+          "usage: trello-cli create --list <id> --name <title> [--desc <text>] [--label <id>...] [--member <id>...]"
         );
       }
       const c = await client.createCard({
@@ -143,7 +144,7 @@ const main = async (): Promise<void> => {
     case "move": {
       const [cardId, listId] = rest;
       if (!cardId || !listId) {
-        throw new Error("usage: trello move <cardId> <listId>");
+        throw new Error("usage: trello-cli move <cardId> <listId>");
       }
       const c = await client.moveCard(cardId, listId);
       console.log(`moved ${c.id} -> list ${c.idList}`);
@@ -152,7 +153,7 @@ const main = async (): Promise<void> => {
     case "archive": {
       const cardId = rest[0];
       if (!cardId) {
-        throw new Error("usage: trello archive <cardId>");
+        throw new Error("usage: trello-cli archive <cardId>");
       }
       await client.archiveCard(cardId);
       console.log(`archived ${cardId}`);
@@ -161,7 +162,7 @@ const main = async (): Promise<void> => {
     case "delete": {
       const cardId = rest[0];
       if (!cardId) {
-        throw new Error("usage: trello delete <cardId>");
+        throw new Error("usage: trello-cli delete <cardId>");
       }
       await client.deleteCard(cardId);
       console.log(`deleted ${cardId}`);
@@ -171,7 +172,7 @@ const main = async (): Promise<void> => {
       const [cardId, ...words] = rest;
       const text = words.join(" ");
       if (!cardId || !text) {
-        throw new Error("usage: trello comment <cardId> <text...>");
+        throw new Error("usage: trello-cli comment <cardId> <text...>");
       }
       const c = await client.addComment(cardId, text);
       console.log(`commented on ${cardId} (action ${c.id})`);
@@ -180,7 +181,7 @@ const main = async (): Promise<void> => {
     case "comments": {
       const cardId = rest[0];
       if (!cardId) {
-        throw new Error("usage: trello comments <cardId>");
+        throw new Error("usage: trello-cli comments <cardId>");
       }
       const comments = await client.getComments(cardId);
       if (comments.length === 0) {
@@ -195,7 +196,7 @@ const main = async (): Promise<void> => {
       return;
     }
     default:
-      throw new Error(`unknown command "${command}". Run \`trello help\`.`);
+      throw new Error(`unknown command "${command}". Run \`trello-cli help\`.`);
   }
 };
 

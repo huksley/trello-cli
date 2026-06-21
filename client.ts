@@ -3,9 +3,9 @@
  *
  * Auth: Trello requires BOTH an API key and a token on every authenticated
  * request — the key identifies the app, the token authorises a member's account.
- * A key on its own gets a 401. We read TRELLO_API_KEY + TRELLO_TOKEN (see
- * trello/README.md for how to mint them) and attach them as `key`/`token` query
- * params on each call.
+ * A key on its own gets a 401. We read TRELLO_API_KEY + TRELLO_TOKEN (see the
+ * README for how to mint them) and attach them as `key`/`token` query params on
+ * each call.
  *
  * Scope: manage cards (this wrapper's "issues") and their comments. The board/
  * list helpers exist so you can discover the ids the card methods need.
@@ -127,7 +127,7 @@ export class TrelloClient {
     if (!creds.key || !creds.token) {
       throw new Error(
         "TrelloClient needs both an API key and a token. " +
-          "Set TRELLO_API_KEY and TRELLO_TOKEN (see trello/README.md)."
+          "Set TRELLO_API_KEY and TRELLO_TOKEN (see the README)."
       );
     }
     this.key = creds.key;
@@ -149,7 +149,7 @@ export class TrelloClient {
     if (missing.length > 0) {
       throw new Error(
         `Missing ${missing.join(" + ")}. Trello needs an API key AND a token; ` +
-          "see trello/README.md for how to mint them."
+          "see the README for how to mint them."
       );
     }
     return new TrelloClient({

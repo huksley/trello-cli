@@ -1,0 +1,62 @@
+{
+  "name": "@huksley/trello-cli",
+  "version": "1.0.0",
+  "description": "Tiny, dependency-free Trello REST API client and CLI for managing cards (issues) and their comments.",
+  "keywords": [
+    "trello",
+    "trello-api",
+    "cli",
+    "kanban",
+    "cards",
+    "issues",
+    "comments"
+  ],
+  "license": "MIT",
+  "author": "Ruslan Gainutdinov <ruslan@datacrunch.io>",
+  "homepage": "https://github.com/huksley/trello-cli#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/huksley/trello-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/huksley/trello-cli/issues"
+  },
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "trello-cli": "dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node build.mjs",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "dev": "node --env-file-if-exists=.env.development cli.ts",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "esbuild": "^0.28.1",
+    "typescript": "^6.0.3"
+  }
+}

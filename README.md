@@ -1,20 +1,34 @@
-# Trello wrapper
+# @huksley/trello-cli
 
 A tiny, dependency-free [Trello REST API](https://developer.atlassian.com/cloud/trello/rest/)
-wrapper for Node (uses the global `fetch`, no packages). It manages **cards** and
-their **comments**.
+client **and** CLI for Node (uses the global `fetch`, zero runtime dependencies).
+It manages **cards** and their **comments**.
 
 > **Vocabulary:** Trello has no "issues". A Trello **card** is the unit of work, so
 > here _issue === card_. Cards live in **lists** (their status column) on a **board**.
+
+## Install
+
+```sh
+# as a CLI
+npm i -g @huksley/trello-cli
+trello-cli help
+
+# or run without installing
+npx @huksley/trello-cli help
+
+# as a library
+npm i @huksley/trello-cli
+```
 
 ## Auth — you need a key **and** a token
 
 Trello authenticates every request with **two** values:
 
-| value             | env var          | what it is                                  |
-| ----------------- | ---------------- | ------------------------------------------- |
-| API key           | `TRELLO_API_KEY` | identifies the app/Power-Up                 |
-| token             | `TRELLO_TOKEN`   | authorises **your** account (read + write)  |
+| value   | env var          | what it is                                 |
+| ------- | ---------------- | ------------------------------------------ |
+| API key | `TRELLO_API_KEY` | identifies the app/Power-Up                |
+| token   | `TRELLO_TOKEN`   | authorises **your** account (read + write) |
 
 A key on its own returns `401` — the token is what grants access to your boards.
 
@@ -26,47 +40,46 @@ A key on its own returns `401` — the token is what grants access to your board
    this URL (swap in your key) and approve:
 
    ```
-   https://trello.com/1/authorize?expiration=never&scope=read,write&response_type=token&name=trello-wrapper&key=YOUR_API_KEY
+   https://trello.com/1/authorize?expiration=never&scope=read,write&response_type=token&name=trello-cli&key=YOUR_API_KEY
    ```
 
    Copy the token it shows you.
 
-Put both in `.env.development` (gitignored):
+Export both (or put them in a `.env` and load it, e.g. `node --env-file=.env`):
 
 ```sh
-TRELLO_API_KEY=...
-TRELLO_TOKEN=...
-# optional: TRELLO_API_BASE_URL=https://api.trello.com/1
+export TRELLO_API_KEY=...
+export TRELLO_TOKEN=...
+# optional: export TRELLO_API_BASE_URL=https://api.trello.com/1
 ```
 
 ## CLI
 
 ```sh
-# via the npm script (loads .env.development automatically)
-npm run trello -- help
-npm run trello -- boards
-npm run trello -- lists  <boardId>      # find list ids (status columns)
-npm run trello -- cards  <boardId>      # list issues on a board
-npm run trello -- card   <cardId>
+trello-cli help
+trello-cli boards
+trello-cli lists  <boardId>      # find list ids (status columns)
+trello-cli cards  <boardId>      # list issues on a board
+trello-cli card   <cardId>
 
-npm run trello -- create --list <listId> --name "Fix login bug" --desc "Steps..."
-npm run trello -- move    <cardId> <listId>     # change status column
-npm run trello -- archive <cardId>              # Trello's "close"
+trello-cli create --list <listId> --name "Fix login bug" --desc "Steps..."
+trello-cli move    <cardId> <listId>     # change status column
+trello-cli archive <cardId>              # Trello's "close"
 
-npm run trello -- comment  <cardId> "looking into this"
-npm run trello -- comments <cardId>             # read the thread, oldest first
+trello-cli comment  <cardId> "looking into this"
+trello-cli comments <cardId>             # read the thread, oldest first
 ```
 
-Or call the script directly:
+`--label` and `--member` are repeatable on `create`:
 
 ```sh
-node --env-file-if-exists=.env.development trello/cli.ts comments <cardId>
+trello-cli create --list <listId> --name "Bug" --label <labelId> --label <labelId> --member <memberId>
 ```
 
 ## Library
 
 ```ts
-import { createTrelloClient } from "./trello/index.ts";
+import { createTrelloClient } from "@huksley/trello-cli";
 
 const trello = createTrelloClient(); // reads TRELLO_API_KEY + TRELLO_TOKEN
 
@@ -88,7 +101,7 @@ const thread = await trello.getComments(card.id); // [{ id, text, date, authorNa
 Construct it explicitly if you'd rather not use env vars:
 
 ```ts
-import { TrelloClient } from "./trello/index.ts";
+import { TrelloClient } from "@huksley/trello-cli";
 const trello = new TrelloClient({ key: "…", token: "…" });
 ```
 
@@ -97,6 +110,7 @@ const trello = new TrelloClient({ key: "…", token: "…" });
 `TrelloClient` (and `createTrelloClient()` / `TrelloClient.fromEnv()`):
 
 - **Boards / lists:** `listBoards()`, `listLists(boardId, includeClosed?)`
+- **Members / labels:** `getMe()`, `listMembers(boardId)`, `listLabels(boardId)`
 - **Cards (issues):** `listCardsOnBoard(boardId, includeClosed?)`,
   `listCardsInList(listId)`, `getCard(cardId)`, `createCard(input)`,
   `updateCard(cardId, changes)`, `moveCard(cardId, listId)`,
@@ -117,3 +131,16 @@ Non-2xx responses throw a `TrelloApiError` (`.status`, `.method`, `.path`, `.bod
 - **Rate limits:** Trello allows ~300 requests / 10s per key and ~100 / 10s per
   token. This wrapper doesn't retry/back off — handle `TrelloApiError` (HTTP 429)
   if you hit them.
+
+## Develop
+
+```sh
+npm install
+npm run dev -- help        # run the CLI from source (Node 22+; loads .env.development)
+npm run typecheck
+npm run build              # esbuild → dist/{index,cli}.js + tsc → dist/*.d.ts
+```
+
+## License
+
+[MIT](./LICENSE)
