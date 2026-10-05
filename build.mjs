@@ -40,10 +40,13 @@ await esbuild.build({
 });
 
 console.log("• bundling cli.ts → dist/cli.js");
+const { version } = JSON.parse(fs.readFileSync(p("package.json"), "utf8"));
 await esbuild.build({
   ...shared,
   entryPoints: [p("cli.ts")],
   outfile: p("dist", "cli.js"),
+  // Bake the version in so `trello-cli --version` needs no package.json lookup at runtime.
+  define: { __VERSION__: JSON.stringify(version) },
 });
 
 console.log("• emitting declarations → dist/*.d.ts");

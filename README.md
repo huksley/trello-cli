@@ -68,6 +68,7 @@ trello-cli archive <cardId>              # Trello's "close"
 
 trello-cli comment  <cardId> "looking into this"
 trello-cli comments <cardId>             # read the thread, oldest first
+trello-cli --version                     # print the version (no credentials needed)
 ```
 
 `--label` and `--member` are repeatable on `create`:

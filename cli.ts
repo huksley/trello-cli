@@ -9,8 +9,20 @@
  *   npm run dev -- <command> [args]                                   # via package.json
  */
 
+import { readFileSync } from "node:fs";
 import { TrelloClient } from "./client.ts";
 import type { TrelloCard } from "./types.ts";
+
+/** Replaced with the package version by esbuild (see build.mjs); undefined when run from source. */
+declare const __VERSION__: string | undefined;
+
+const getVersion = (): string => {
+  if (typeof __VERSION__ !== "undefined") {
+    return __VERSION__;
+  }
+  const pkg = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as { version: string };
+  return pkg.version;
+};
 
 const USAGE = `trello-cli — manage Trello cards ("issues") + comments
 
@@ -27,6 +39,7 @@ Usage:
   trello-cli delete <cardId>                 Permanently delete a card
   trello-cli comment <cardId> <text...>      Add a comment
   trello-cli comments <cardId>               Read comments (oldest first)
+  trello-cli --version                       Print the version
 
 Auth: set TRELLO_API_KEY and TRELLO_TOKEN (see the README).`;
 
@@ -67,6 +80,10 @@ const main = async (): Promise<void> => {
   const [command, ...argv] = process.argv.slice(2);
   if (!command || command === "help" || command === "--help" || command === "-h") {
     console.log(USAGE);
+    return;
+  }
+  if (command === "version" || command === "--version" || command === "-v") {
+    console.log(getVersion());
     return;
   }
 
