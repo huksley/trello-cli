@@ -1,6 +1,6 @@
 {
   "name": "@huksley/trello-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Tiny, dependency-free Trello REST API client and CLI for managing cards (issues) and their comments.",
   "keywords": [
     "trello",
